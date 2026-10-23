@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Enable pnpm (version from package.json "packageManager")
+        run: corepack enable
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm -r typecheck
+      - name: Build
+        run: pnpm -r build
+        env:
+          VITE_API_URL: https://example.invalid/api
+          VITE_RAVEX_URL: https://example.invalid
+
+  test:
+    name: Server tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ravex
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The tests run in an isolated "test" schema and refuse to touch "public".
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ravex?schema=test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ravex
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/ravex
+      JWT_SECRET: ci-only-secret-that-is-long-enough-for-validation
+      CLIENT_URL: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Test
+        run: pnpm --filter @support-chat/server test
