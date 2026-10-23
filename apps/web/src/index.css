@@ -1,0 +1,259 @@
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
+
+/*
+ * "Instrument" theme for Ravex Support.
+ *  - Gallery whites and ink, one accent: raven plum (validated for charts as #a3477c).
+ *  - Space Grotesk (the Ravex site's face) for voice; JetBrains Mono for annotations.
+ *  - Technical-drawing details: measurement labels, rulers with arrowheads, lens circles.
+ *  - Tactile pill buttons with a ledge; faceted chat bubbles echo the low-poly raven.
+ */
+@theme {
+  --font-sans: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-surface: #ffffff;
+  --color-paper: #fafcfc;
+  --color-paper-2: #f2f4f5;
+  --color-paper-3: #e9eced;
+  --color-ink: #050505;
+  --color-ink-2: #141414;
+  --color-ink-3: #232323;
+  --color-graphite: #4b4f52;
+  /* #75787b on paper ≈ 4.5:1, so timestamps and labels stay readable. */
+  --color-mute: #75787b;
+  --color-line: #e3e6e8;
+  --color-line-strong: #cfd3d6;
+
+  --color-plum-50: #fbf3f8;
+  --color-plum-100: #f5e3ee;
+  --color-plum-200: #ebc6dc;
+  --color-plum-300: #db9cc2;
+  --color-plum-400: #c46fa3;
+  --color-plum-500: #a3477c;
+  --color-plum-600: #86386a;
+  --color-plum-700: #6a2c54;
+  --color-plum-800: #4a1f3b;
+  --color-plum-900: #2b1222;
+
+  --color-signal: #16a34a;
+  --color-caution: #d97706;
+  --color-danger: #c2410c;
+
+  --animate-marquee: marquee 45s linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-draw: draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-14px) rotate(0.6deg); }
+}
+@keyframes draw {
+  from { stroke-dashoffset: var(--len, 600); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cell-flash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: var(--cell-opacity, 0.35); }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  100% { box-shadow: 0 0 0 7px rgba(22, 163, 74, 0); }
+}
+
+/*
+ * Dark theme: the same roles with new values. Paper and ink swap; plum tints darken so badges and
+ * focus rings still read. Chart series use the steps validated for the dark surface.
+ * Applied by the OS setting unless the user picked a theme (data-theme on <html>).
+ */
+:root {
+  --grid-line: rgba(5, 5, 5, 0.055);
+  --series-1: #a3477c;
+  --series-2: #2a78d6;
+  --series-3: #1baf7a;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-surface: #131316;
+    --color-paper: #0b0b0d;
+    --color-paper-2: #18181c;
+    --color-paper-3: #222227;
+    --color-ink: #f3f4f5;
+    --color-ink-2: #e4e5e7;
+    --color-ink-3: #cfd1d4;
+    --color-graphite: #b0b4b8;
+    --color-mute: #8a8e93;
+    --color-line: #24252a;
+    --color-line-strong: #36383e;
+    --color-plum-50: #24101c;
+    --color-plum-100: #3a1830;
+    --color-plum-200: #5a2648;
+    --color-plum-300: #d58ab7;
+    --grid-line: rgba(250, 252, 252, 0.06);
+    --series-1: #c35a98;
+    --series-2: #3987e5;
+    --series-3: #199e70;
+    color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-surface: #131316;
+    --color-paper: #0b0b0d;
+    --color-paper-2: #18181c;
+    --color-paper-3: #222227;
+    --color-ink: #f3f4f5;
+    --color-ink-2: #e4e5e7;
+    --color-ink-3: #cfd1d4;
+    --color-graphite: #b0b4b8;
+    --color-mute: #8a8e93;
+    --color-line: #24252a;
+    --color-line-strong: #36383e;
+    --color-plum-50: #24101c;
+    --color-plum-100: #3a1830;
+    --color-plum-200: #5a2648;
+    --color-plum-300: #d58ab7;
+    --grid-line: rgba(250, 252, 252, 0.06);
+    --series-1: #c35a98;
+    --series-2: #3987e5;
+    --series-3: #199e70;
+    color-scheme: dark;
+  }
+}
+
+/* Panels that are always dark (sign-in exhibit, mobile menu…): pin the light-theme roles so
+   bg-ink stays near-black and text-paper stays light in both themes. */
+.keep-light {
+  --color-surface: #ffffff;
+  --color-paper: #fafcfc;
+  --color-paper-2: #f2f4f5;
+  --color-paper-3: #e9eced;
+  --color-ink: #050505;
+  --color-ink-2: #141414;
+  --color-ink-3: #232323;
+  --color-graphite: #4b4f52;
+  --color-mute: #75787b;
+  --color-line: #e3e6e8;
+  --color-line-strong: #cfd3d6;
+  --color-plum-50: #fbf3f8;
+  --color-plum-100: #f5e3ee;
+  --color-plum-200: #ebc6dc;
+  --color-plum-300: #db9cc2;
+  --grid-line: rgba(5, 5, 5, 0.055);
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'ss03';
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  ::selection {
+    background: var(--color-plum-200);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-plum-500);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Tactile pill (after Bato): a solid ledge that the button presses into. */
+  .btn-press {
+    --ledge: var(--color-plum-700);
+    box-shadow: 0 4px 0 0 var(--ledge);
+    transform: translateY(0);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 150ms ease, color 150ms ease;
+  }
+  .btn-press:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 0 0 var(--ledge);
+  }
+  .btn-press:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 0 var(--ledge);
+  }
+  .btn-press:disabled {
+    box-shadow: 0 2px 0 0 var(--color-line-strong);
+  }
+
+  /* Mono annotation, e.g. "D = 50,0". */
+  .annot {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--color-mute);
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  /* Faceted corners, after the low-poly raven. --facet sets the cut. */
+  .facet-br {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--facet, 12px)), calc(100% - var(--facet, 12px)) 100%, 0 100%);
+  }
+  .facet-bl {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, var(--facet, 12px) 100%, 0 calc(100% - var(--facet, 12px)));
+  }
+  /* 1px outline that follows a clipped shape; apply to a wrapper around the faceted element. */
+  .facet-outline {
+    filter: drop-shadow(1px 0 0 var(--outline, var(--color-line-strong))) drop-shadow(-1px 0 0 var(--outline, var(--color-line-strong)))
+      drop-shadow(0 1px 0 var(--outline, var(--color-line-strong))) drop-shadow(0 -1px 0 var(--outline, var(--color-line-strong)));
+  }
+
+  /* Technical paper: a quiet dot grid. */
+  .bg-dots {
+    background-image: radial-gradient(var(--color-line-strong) 0.8px, transparent 0.8px);
+    background-size: 22px 22px;
+    background-position: -11px -11px;
+  }
+  .bg-dots-dark {
+    background-image: radial-gradient(rgba(250, 252, 252, 0.12) 0.8px, transparent 0.8px);
+    background-size: 22px 22px;
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+  .mask-radial {
+    mask-image: radial-gradient(closest-side, black 35%, transparent);
+  }
+
+  .live-pulse {
+    animation: pulse-ring 1.6s ease-out infinite;
+  }
+  .tracking-display {
+    letter-spacing: -0.045em;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
